@@ -30,7 +30,6 @@ class _EncodeViewState extends State<EncodeView> {
   String _sourceDuration = '';
 
   String _outputType = 'MP4';
-  int _outputQuality = 50;
   String _outputFileSize = '';
   String _processingTime = '';
 
@@ -144,7 +143,7 @@ class _EncodeViewState extends State<EncodeView> {
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Text('Video output:\n\n' +
-                              'Length: $_outputFileSize\n\nNOTE: If video is HLS type then when play output it\'s only a fragment in video source!'),
+                              'Length: $_outputFileSize'),
                         ),
                       ),
                       TextButton(
@@ -283,13 +282,16 @@ class _EncodeViewState extends State<EncodeView> {
         }
       }
       _outputFileSize = filesize(totalSize);
-      var fileFullHD = files
-          .firstWhere((element) => element.path.contains('fileSequence_0.ts'));
-      _localVideoEndCodedPath = (fileFullHD as File).path;
+      var fileMaster = files
+          .firstWhere((element) => element.path.contains('master.m3u8'));
+      _localVideoEndCodedPath = (fileMaster as File).path;
     } else {
       var f = File(encodedFilesDir);
       _outputFileSize = filesize(await f.length());
     }
+
+    final info = await EncodingProvider.getMediaInformation(_localVideoEndCodedPath!);
+    print('thang___' + info.getStreams()![0].getAllProperties().toString());
 
     setState(() {
       _processingTime =

@@ -19,15 +19,14 @@ class EncodingProvider {
     // Source https://hlsbook.net/creating-a-master-playlist-with-ffmpeg/
     final arguments = '-y -i $videoPath ' +
         '-preset ultrafast -g 48 -sc_threshold 0 ' +
-        '-map 0:0 -map 0:1 -map 0:0 -map 0:1 ' +
-        '-c:v:0 libx264 -b:v:0 5300k ' + //https://docs.peer5.com/guides/production-ready-hls-vod/#:~:text=4500k-,5300k,-192k
-        '-c:v:1 libx264 -b:v:1 400k ' + // https://docs.peer5.com/guides/production-ready-hls-vod/#:~:text=426x240-,400k,-600k
+        '-map 0:0 -map 0:1 ' +
+        '-c:v 1280x720 -c:v libx264 -b:v 3200k ' +
         '-c:a copy ' +
-        '-var_stream_map "v:0,a:0 v:1,a:1" ' +
+        '-var_stream_map "v:0,a:0 " ' +
         '-master_pl_name master.m3u8 ' +
         '-f hls -hls_time 6 -hls_list_size 0 ' +
-        '-hls_segment_filename "$outDirPath/%v_fileSequence_%d.ts" ' +
-        '$outDirPath/%v_playlistVariant.m3u8';
+        '-hls_segment_filename "$outDirPath/fileSequence_%d.ts" ' +
+        '$outDirPath/playlistVariant.m3u8';
 
     final int rc = await _encoder.execute(arguments);
     assert(rc == 0);
@@ -38,10 +37,10 @@ class EncodingProvider {
   static Future<String> encodeMP4(videoPath, outDirPath, quality) async {
     assert(File(videoPath).existsSync());
 
-    // https://unix.stackexchange.com/questions/28803/how-can-i-reduce-a-videos-size-with-ffmpeg#:~:text=790-,This,-answer%20was%20written
     final arguments = '-y -i $videoPath ' +
-        '-c:v libx264 ' +
-        '-preset ultrafast -crf 28 -c:a copy ' +
+        '-vf scale=1280:720 ' +
+        '-preset ultrafast -crf 28 ' +
+        '-c:a copy ' +
         '$outDirPath.mp4';
 
     final int rc = await _encoder.execute(arguments);
